@@ -77,6 +77,27 @@ functions:
       - http:
           path: todos
           method: post
+  get:
+    handler: api/todo.get
+    description: Gets a todo item
+    events:
+      - http:
+          path: todos/{id}
+          method: get
+  getAll:
+    handler: api/todo.getAll
+    description: Gets all the todo items
+    events:
+      - http:
+          path: todos
+          method: get
+  update:
+    handler: api/todo.update
+    description: Updates a todo item
+    events:
+      - http:
+          path: todos/{id}
+          method: put
 
 #    The following are a few example events you can configure
 #    NOTE: Please make sure to change your handler code to work with those events
