@@ -1,9 +1,9 @@
 'use strict';
 
 const AWS = require('aws-sdk');
-
 const dynamodb = new AWS.DynamoDB.DocumentClient();
 
+// Creates a todo item
 module.exports.create = async (event, context, callback) => {
   const requestBody = JSON.parse(event.body);
   const title = requestBody.title;
@@ -37,6 +37,7 @@ module.exports.create = async (event, context, callback) => {
   }
 };
 
+// Gets a todo item by ID
 module.exports.get = async (event, context, callback) => {
   const params = {
     TableName: process.env.TODO_TABLE,
@@ -60,6 +61,7 @@ module.exports.get = async (event, context, callback) => {
 
 };
 
+// Gets all todo items
 module.exports.getAll = async (event, context, callback) => {
   const params = {
     TableName: process.env.TODO_TABLE
@@ -79,6 +81,7 @@ module.exports.getAll = async (event, context, callback) => {
   }
 };
 
+// Updates a todo item by ID
 module.exports.update = async (event, context, callback) => {
   const requestBody = JSON.parse(event.body);
   const title = requestBody.title;
@@ -105,6 +108,7 @@ module.exports.update = async (event, context, callback) => {
   }
 }
 
+// Deletes a todo item by ID
 module.exports.delete = async (event, context, callback) => {
   const params = {
     TableName: process.env.TODO_TABLE,
