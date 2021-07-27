@@ -35,6 +35,7 @@ provider:
         - dynamodb:Scan
         - dynamodb:GetItem
         - dynamodb:PutItem
+        - dynamodb:DeleteItem
       Resource: !Sub arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${self:provider.environment.TODO_TABLE}
 
 # you can overwrite defaults here
@@ -98,6 +99,13 @@ functions:
       - http:
           path: todos/{id}
           method: put
+  delete:
+    handler: api/todo.delete
+    description: Deletes a todo item
+    events:
+      - http:
+          path: todos/{id}
+          method: delete
 
 #    The following are a few example events you can configure
 #    NOTE: Please make sure to change your handler code to work with those events

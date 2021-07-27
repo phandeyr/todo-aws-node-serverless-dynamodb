@@ -9,8 +9,10 @@ module.exports.create = async (event, context, callback) => {
   const title = requestBody.title;
 
   if (!title) {
-    callback(new Error('Title is required to create todo'));
-    return;
+    return {
+      statusCode: 500,
+      body: JSON.stringify({ 'message': 'Title is required to create todo' })
+    };
   }
 
   const params = {
@@ -21,12 +23,18 @@ module.exports.create = async (event, context, callback) => {
     }
   };
 
-  await dynamodb.put(params).promise();
-
-  return {
-    statusCode: 200,
-    body: JSON.stringify({ 'message': 'Todo created successfully' })
-  };
+  try {
+    await dynamodb.put(params).promise();
+    return {
+      statusCode: 200,
+      body: JSON.stringify({ 'message': 'Todo created successfully' })
+    };
+  } catch(error) {
+    return {
+      statusCode: 500,
+      body: JSON.stringify({ 'message': 'Unable to create todo' })
+    };
+  }
 };
 
 module.exports.get = async (event, context, callback) => {
@@ -37,12 +45,19 @@ module.exports.get = async (event, context, callback) => {
     }
   };
 
-  const result = await dynamodb.get(params).promise();
+  try {
+    const result = await dynamodb.get(params).promise();
+    return {
+      statusCode: 200,
+      body: JSON.stringify(result)
+    };
+  } catch(error) {
+    return {
+      statusCode: 500,
+      body: JSON.stringify({ 'message': 'Unable to get todo' })
+    };
+  }
 
-  return {
-    statusCode: 200,
-    body: JSON.stringify(result)
-  };
 };
 
 module.exports.getAll = async (event, context, callback) => {
@@ -50,11 +65,17 @@ module.exports.getAll = async (event, context, callback) => {
     TableName: process.env.TODO_TABLE
   };
 
-  const result = await dynamodb.scan(params).promise();
-
-  return {
-    statusCode: 200,
-    body: JSON.stringify(result)
+  try{
+    const result = await dynamodb.scan(params).promise();
+    return {
+      statusCode: 200,
+      body: JSON.stringify(result)
+    }
+  } catch(error) {
+    return {
+      statusCode: 500,
+      body: JSON.stringify({ 'message': 'Unable to get todos' })
+    };
   }
 };
 
@@ -70,10 +91,47 @@ module.exports.update = async (event, context, callback) => {
     }
   };
 
-  await dynamodb.put(params).promise();
+  try {
+    await dynamodb.put(params).promise();
+    return {
+      statusCode: 200,
+      body: JSON.stringify({ 'message': 'Todo updated successfully' })
+    };
+  } catch(error) {
+    return {
+      statusCode: 500,
+      body: JSON.stringify({ 'message': 'Unable to update todo' })
+    };
+  }
+}
 
-  return {
-    statusCode: 200,
-    body: JSON.stringify({ 'message': 'Todo updated successfully' })
+module.exports.delete = async (event, context, callback) => {
+  const params = {
+    TableName: process.env.TODO_TABLE,
+    Key: {
+      ID: event.pathParameters.id
+    },
+    ReturnValues: 'ALL_OLD',
+    Exists: true
   };
+
+  try {
+    const result = await dynamodb.delete(params).promise();
+
+    if (!result.Attributes) {
+      return {
+        statusCode: 500,
+        body: JSON.stringify({ 'message': 'Unable to delete todo' })
+      };
+    }
+    return {
+      statusCode: 200,
+      body: JSON.stringify({ 'message': 'Todo deleted successfully' })
+    };
+  } catch(error) {
+    return {
+      statusCode: 500,
+      body: JSON.stringify({ 'message': 'Unable to delete todo' })
+    };
+  }
 }
